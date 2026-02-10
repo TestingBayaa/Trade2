@@ -4,8 +4,11 @@ import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button-variants";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { sendSignInLinkToEmail } from "firebase/auth";
 import { useToast } from "@/hooks/use-toast";
-import { supabase } from "@/integrations/supabase/client";
+import { auth } from "../firebase"; // adjust path if your firebase.ts is elsewhere
+import { signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider, GithubAuthProvider } from "firebase/auth";
+
 import { Eye, EyeOff, Mail, Lock, Github } from "lucide-react";
 
 export default function Login() {
@@ -19,19 +22,15 @@ export default function Login() {
   const handleEmailLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-
+  
     try {
-      const { error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
-
-      if (error) throw error;
-
+      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+  
       toast({
         title: "Welcome back!",
-        description: "You have successfully logged in.",
+        description: `Hello ${userCredential.user.displayName || userCredential.user.email}`,
       });
+  
       navigate("/dashboard");
     } catch (error: any) {
       toast({
@@ -43,16 +42,23 @@ export default function Login() {
       setIsLoading(false);
     }
   };
+  
 
   const handleOAuthLogin = async (provider: "github" | "google") => {
     try {
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider,
-        options: {
-          redirectTo: `${window.location.origin}/dashboard`,
-        },
+      let authProvider;
+      if (provider === "google") authProvider = new GoogleAuthProvider();
+      else if (provider === "github") authProvider = new GithubAuthProvider();
+      else throw new Error("Only Google and GitHub login implemented");
+  
+      const result = await signInWithPopup(auth, authProvider);
+  
+      toast({
+        title: "Signed in",
+        description: `Welcome ${result.user.displayName || result.user.email}`,
       });
-      if (error) throw error;
+  
+      navigate("/dashboard");
     } catch (error: any) {
       toast({
         title: "Error",
@@ -61,6 +67,7 @@ export default function Login() {
       });
     }
   };
+  
 
   const handleMagicLink = async () => {
     if (!email) {
@@ -71,18 +78,21 @@ export default function Login() {
       });
       return;
     }
-
+  
     setIsLoading(true);
+  
     try {
-      const { error } = await supabase.auth.signInWithOtp({
-        email,
-        options: {
-          emailRedirectTo: `${window.location.origin}/dashboard`,
-        },
-      });
-
-      if (error) throw error;
-
+      // This tells Firebase where to redirect after clicking the link
+      const actionCodeSettings = {
+        url: `${window.location.origin}/dashboard`, // your redirect URL
+        handleCodeInApp: true, // must be true for magic link
+      };
+  
+      await sendSignInLinkToEmail(auth, email, actionCodeSettings);
+  
+      // Save email locally so you can complete login after redirect
+      window.localStorage.setItem("emailForSignIn", email);
+  
       toast({
         title: "Magic link sent!",
         description: "Check your email for the login link.",

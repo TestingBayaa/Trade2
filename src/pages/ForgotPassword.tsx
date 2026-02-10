@@ -5,7 +5,9 @@ import { Button } from "@/components/ui/button-variants";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { supabase } from "@/integrations/supabase/client";
+import { sendPasswordResetEmail } from "firebase/auth";
+import { auth } from "../firebase"; // adjust the path if needed
+
 import { Mail, ArrowLeft, CheckCircle } from "lucide-react";
 
 export default function ForgotPassword() {
@@ -17,14 +19,10 @@ export default function ForgotPassword() {
   const handleResetPassword = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-
+  
     try {
-      const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/reset-password`,
-      });
-
-      if (error) throw error;
-
+      await sendPasswordResetEmail(auth, email); // Firebase method
+  
       setIsSubmitted(true);
     } catch (error: any) {
       toast({
@@ -36,6 +34,7 @@ export default function ForgotPassword() {
       setIsLoading(false);
     }
   };
+  
 
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-8">
