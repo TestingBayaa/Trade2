@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
+import { sendEmailVerification } from "firebase/auth";
 import { Button } from "@/components/ui/button-variants";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -38,19 +39,22 @@ export default function Signup() {
     setIsLoading(true);
   
     try {
-      // Create user with Firebase Auth
+      // Create user
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
   
-      // Set the display name (full name)
+      // Set display name
       await updateProfile(userCredential.user, { displayName: name });
+  
+      // Send verification email
+      await sendEmailVerification(userCredential.user);
   
       toast({
         title: "Account created",
-        description: "You can now sign in with your email and password.",
+        description: "A verification email has been sent. Please verify before logging in.",
       });
   
-      // Redirect to dashboard
-      navigate("/dashboard");
+      // Optionally, you can navigate somewhere or leave the user on the signup page
+      // navigate("/dashboard"); // DON'T navigate if you want them to verify first
     } catch (error: any) {
       toast({
         title: "Error",
@@ -61,7 +65,6 @@ export default function Signup() {
       setIsLoading(false);
     }
   };
-  
 
   const handleOAuthSignup = async (provider: "google" | "github") => {
     try {
