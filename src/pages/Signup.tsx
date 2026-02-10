@@ -6,7 +6,11 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
-import { supabase } from "@/integrations/supabase/client";
+import { auth } from "../firebase"; // adjust path if your firebase.ts is elsewhere
+import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
+import { GoogleAuthProvider, GithubAuthProvider, signInWithPopup } from "firebase/auth";
+
+
 import { Eye, EyeOff, Mail, Lock, User, Github } from "lucide-react";
 
 export default function Signup() {
@@ -21,7 +25,7 @@ export default function Signup() {
 
   const handleEmailSignup = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+  
     if (!agreeTerms) {
       toast({
         title: "Terms required",
@@ -30,27 +34,23 @@ export default function Signup() {
       });
       return;
     }
-
+  
     setIsLoading(true);
-
+  
     try {
-      const { error } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          emailRedirectTo: `${window.location.origin}/dashboard`,
-          data: {
-            full_name: name,
-          },
-        },
-      });
-
-      if (error) throw error;
-
+      // Create user with Firebase Auth
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+  
+      // Set the display name (full name)
+      await updateProfile(userCredential.user, { displayName: name });
+  
       toast({
-        title: "Check your email",
-        description: "We've sent you a verification link to complete your signup.",
+        title: "Account created",
+        description: "You can now sign in with your email and password.",
       });
+  
+      // Redirect to dashboard
+      navigate("/dashboard");
     } catch (error: any) {
       toast({
         title: "Error",
@@ -61,16 +61,23 @@ export default function Signup() {
       setIsLoading(false);
     }
   };
+  
 
-  const handleOAuthSignup = async (provider: "github" | "google") => {
+  const handleOAuthSignup = async (provider: "google" | "github") => {
     try {
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider,
-        options: {
-          redirectTo: `${window.location.origin}/dashboard`,
-        },
+      let authProvider;
+      if (provider === "google") authProvider = new GoogleAuthProvider();
+      else if (provider === "github") authProvider = new GithubAuthProvider();
+      else throw new Error("Only Google or GitHub login is implemented");
+  
+      const result = await signInWithPopup(auth, authProvider);
+  
+      toast({
+        title: "Signed in",
+        description: `Welcome ${result.user.displayName || result.user.email}`,
       });
-      if (error) throw error;
+  
+      navigate("/dashboard");
     } catch (error: any) {
       toast({
         title: "Error",
@@ -79,6 +86,8 @@ export default function Signup() {
       });
     }
   };
+  
+  
 
   return (
     <div className="min-h-screen bg-background flex">
