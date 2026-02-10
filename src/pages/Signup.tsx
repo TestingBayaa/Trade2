@@ -100,18 +100,15 @@ export default function Signup() {
         <div className="absolute inset-0 grid-pattern opacity-20" />
         <div className="relative text-center p-12">
           <h2 className="text-3xl font-bold">
-            Start building with <span className="gradient-text">TradoGate</span>
+            Start Learning with <span className="gradient-text">TradoGate</span>
           </h2>
-          <p className="mt-4 text-muted-foreground max-w-md">
-            The AI-first code editor that helps you write, understand, 
-            and ship code faster.
-          </p>
+         
           <div className="mt-8 flex flex-col gap-4 text-left max-w-sm mx-auto">
             <div className="flex items-center gap-3">
               <div className="h-8 w-8 rounded-full bg-accent/20 flex items-center justify-center">
                 <span className="text-accent">✓</span>
               </div>
-              <span className="text-sm">Free forever for individuals</span>
+              <span className="text-sm">Free</span>
             </div>
             <div className="flex items-center gap-3">
               <div className="h-8 w-8 rounded-full bg-accent/20 flex items-center justify-center">
@@ -123,7 +120,7 @@ export default function Signup() {
               <div className="h-8 w-8 rounded-full bg-accent/20 flex items-center justify-center">
                 <span className="text-accent">✓</span>
               </div>
-              <span className="text-sm">AI code completion included</span>
+              <span className="text-sm">AI included</span>
             </div>
           </div>
         </div>
@@ -139,7 +136,7 @@ export default function Signup() {
           {/* Logo */}
           <Link to="/" className="flex items-center gap-2 mb-8">
             <div className="h-8 w-8 rounded-lg gradient-primary flex items-center justify-center">
-              <span className="text-primary-foreground font-bold text-lg">V</span>
+              <span className="text-primary-foreground font-bold text-lg">T</span>
             </div>
             <span className="text-xl font-bold text-foreground">TradoGate</span>
           </Link>

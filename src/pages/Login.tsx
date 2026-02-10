@@ -120,7 +120,7 @@ export default function Login() {
           {/* Logo */}
           <Link to="/" className="flex items-center gap-2 mb-8">
             <div className="h-8 w-8 rounded-lg gradient-primary flex items-center justify-center">
-              <span className="text-primary-foreground font-bold text-lg">V</span>
+              <span className="text-primary-foreground font-bold text-lg">T</span>
             </div>
             <span className="text-xl font-bold text-foreground">TradoGate</span>
           </Link>
